@@ -31,7 +31,7 @@ def get_common_date():
 # s = get_common_date()
 # print len(s)
 
-def readData(date_set):
+def read_data(date_set):
 	"""
 	only use close price as the value of the stock in each day
 
@@ -42,7 +42,6 @@ def readData(date_set):
 	index = 0
 	for filename in high_beta_file_names:
 		with open(filename) as csvfile:
-			print filename
 			readCSV = csv.reader(csvfile,delimiter=',')
 			rows = [row for row in readCSV][1:]
 			date = [row[0] for row in rows]
@@ -52,7 +51,6 @@ def readData(date_set):
 			index += 1
 	for filename in low_beta_file_names:
 		with open(filename) as csvfile:
-			print filename
 			readCSV = csv.reader(csvfile,delimiter=',')
 			rows = [row for row in readCSV][1:]
 			date = [row[0] for row in rows]
@@ -62,8 +60,13 @@ def readData(date_set):
 			index += 1
 	return np.array(price_array)
 
-date_set = get_common_date()
-print date_set
-price_array = readData(date_set)
-print(price_array)
+def preprocess():
+	date_set = get_common_date()
+	price_array = read_data(date_set)
+	date_list = list(date_set)
+	date_list.sort()
+	return price_array, date_list
+
+if __name__ == '__main__':
+	price_array, date_list = preprocess()
 

@@ -3,8 +3,8 @@ import csv
 import numpy as np
 from collections import defaultdict
 
-high_beta_path = r'/Users/xx/Desktop/Reinforce Learning/project/rlpfmpj/Data/rawdata/high_beta'
-low_beta_path = r'/Users/xx/Desktop/Reinforce Learning/project/rlpfmpj/Data/rawdata/low_beta'
+high_beta_path = r'/Users/chenjunbo/Documents/rlpfmpj/Data/rawdata/high_beta'
+low_beta_path = r'/Users/chenjunbo/Documents/rlpfmpj/Data/rawdata/high_beta'
 high_beta_file_names = glob.glob(high_beta_path+"/*.csv")
 low_beta_file_names = glob.glob(low_beta_path+"/*.csv")
 

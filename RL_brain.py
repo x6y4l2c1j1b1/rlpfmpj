@@ -135,11 +135,18 @@ class DeepQNetwork:
             action = np.random.randint(0, self.n_actions)
         return action
 
+    def choose_greedy_action(self, observation):
+        observation = observation[np.newaxis, :]
+        actions_value = self.sess.run(self.q_eval, feed_dict={self.s: observation})
+        action = np.argmax(actions_value)
+        return action
+
+
     def learn(self):
         # check to replace target parameters
         if self.learn_step_counter % self.replace_target_iter == 0:
             self.sess.run(self.replace_target_op)
-            print('\ntarget_params_replaced\n')
+            # print('\ntarget_params_replaced\n')
 
         # sample batch memory from all memory
         if self.memory_counter > self.memory_size:
@@ -199,6 +206,7 @@ class DeepQNetwork:
         # increasing epsilon
         self.epsilon = self.epsilon + self.epsilon_increment if self.epsilon < self.epsilon_max else self.epsilon_max
         self.learn_step_counter += 1
+ 
 
     def plot_cost(self):
         import matplotlib.pyplot as plt

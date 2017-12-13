@@ -7,7 +7,9 @@ def run_stock():
     step = 0
     win = 0
     lose = 0
-    for episode in range(100):
+    total_episode = 100
+    profit_estimation = 0
+    for episode in range(total_episode):
         # initial observation
         print episode
         env.reset(np.random.randint(0,10), np.random.randint(0,10))
@@ -40,10 +42,50 @@ def run_stock():
         else:
             lose += 1
 
+        profit_estimation = (profit_estimation * episode + (observation[0] - 1000000.))/(episode+1.)
+
     # end of game
-        print(observation)
-    print('win: %d lose: %d' % (win, lose))
+        print('total_value: %d, profit_estimation: %d' % (observation[0], profit_estimation))
+    print('train, win: %d, lose: %d, profit_estimation: %d' % (win, lose, profit_estimation))
     #env.destroy()
+
+def test_stock():
+    step = 0
+    win = 0
+    lose = 0
+    total_episode = 100
+    profit_estimation = 0
+    for episode in range(total_episode):
+        # initial observation
+        print episode
+        env.reset(np.random.randint(0,10), np.random.randint(0,10))
+        #observation = env.reset()
+        observation = np.array(env.state)
+        while True:
+            # fresh env
+            #env.render()
+
+            # RL choose action based on observation
+            action = RL.choose_greedy_action(observation)
+            # RL take action and get next observation and reward
+            observation_, reward, done = env.take_action(action)
+            observation_ = np.array(observation_)
+            # swap observation
+            observation = observation_
+
+            # break while loop when end of this episode
+            if done:
+                break
+            step += 1
+        if observation[0] >= 1000000:
+            win += 1
+        else:
+            lose += 1
+        profit_estimation = (profit_estimation * episode + (observation[0] - 1000000.))/(episode+1.)
+
+    # end of game
+        print('total_value: %d, profit_estimation: %d' % (observation[0], profit_estimation))
+    print('test, win: %d, lose: %d, profit_estimation: %d' % (win, lose, profit_estimation))
 
 
 if __name__ == "__main__":
@@ -60,6 +102,5 @@ if __name__ == "__main__":
                       # output_graph=True
                       )
     run_stock()
-    #env.after(100, run_maze)
-    #env.mainloop()
+    test_stock()
     RL.plot_cost()

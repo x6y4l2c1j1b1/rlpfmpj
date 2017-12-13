@@ -6,28 +6,36 @@ from collections import defaultdict
 import math
 
 class Env(object):
-    Hi_Li = "" #store merged data contain hi and lo data
-    actions = [-0.25, -0.1, -0.05, 0, 0.05, 0.1, 0.25] #action list
-    index_hi = -1  #high_beta stock index
-    index_lo  = -1 #low_beta stock index
     
-    state = "" #current state 
-    t = 0      #current timestamp
-    lc = 0     #current leftover cash
-    tv = 0     #current total value
-    
-    
-    def __init__(self, hi, lo):#create env object, using high_beta stock(index: hi) and low_beta stock(index: lo)
-        self.index_hi = hi
-        self.index_lo = lo
-        
-        high_beta_path =  r'/Users/chenjunbo/Documents/rlpfmpj/Data/rawdata/high_beta'
-        low_beta_path  =  r'/Users/chenjunbo/Documents/rlpfmpj/Data/rawdata/low_beta'
+    def __init__(self):
+        high_beta_path =  r'/Users/xx/Desktop/Reinforce Learning/project/rlpfmpj/Data/rawdata/high_beta'
+        low_beta_path  =  r'/Users/xx/Desktop/Reinforce Learning/project/rlpfmpj/Data/rawdata/low_beta'
         high_beta_file_names = glob.glob(high_beta_path+"/*.csv")
         low_beta_file_names  = glob.glob(low_beta_path+"/*.csv")
         
-        Hi_Data = pd.read_csv(high_beta_file_names[hi])
-        Li_Data = pd.read_csv(low_beta_file_names[lo])
+        self.hi_data = []
+        self.low_data = []
+        self.Hi_Li = "" #store merged data contain hi and lo data
+        self.actions = [-0.25, -0.1, -0.05, 0, 0.05, 0.1, 0.25] #action list
+        self.index_hi = -1  #high_beta stock index
+        self.index_lo  = -1 #low_beta stock index
+        
+        self.state = "" #current state 
+        self.t = 0      #current timestamp
+        self.lc = 0     #current leftover cash
+        self.tv = 0     #current total value
+        for hi in range(len(high_beta_file_names)):
+            self.hi_data.append(pd.read_csv(high_beta_file_names[hi]))
+        for lo in range(len(low_beta_file_names)):
+            self.low_data.append(pd.read_csv(low_beta_file_names[lo]))
+
+    
+    def reset(self, hi, lo):#create env object, using high_beta stock(index: hi) and low_beta stock(index: lo)
+        self.index_hi = hi
+        self.index_lo = lo
+        
+        Hi_Data = self.hi_data[hi]
+        Li_Data = self.low_data[lo]
         
         Hi_Li = pd.merge(Hi_Data,Li_Data,on="Date")
         self.Hi_Li = Hi_Li
@@ -104,12 +112,12 @@ class Env(object):
         
         
         new_chp = Hi_Li.loc[ct + 1]["Close_x"]
-        print "new_chp " + str(new_chp)
+        #print "new_chp " + str(new_chp)
         new_clp = Hi_Li.loc[ct + 1]["Close_y"]
-        print "new_clp " + str(new_clp)
-        print "lc: " + str(lc)
+        #print "new_clp " + str(new_clp)
+        #print "lc: " + str(lc)
         new_tv  = new_chp * shareHi + new_clp * shareLo + lc 
-        print "new_TV: " + str(new_tv)
+        #print "new_TV: " + str(new_tv)
         reward  = new_tv - ctv 
         
         new_state = [new_tv, shareHi, shareLo, lc, chp, clp, cstate[4], cstate[5]] 

@@ -140,7 +140,7 @@ if __name__ == "__main__":
                       # output_graph=True
                       )
     
-    # run_stock()
-    # test_stock()
+    run_stock()
+    test_stock()
     run_random()
     RL.plot_cost()

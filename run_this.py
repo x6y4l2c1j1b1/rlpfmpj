@@ -57,7 +57,7 @@ def test_stock():
     profit_estimation = 0
     for episode in range(total_episode):
         # initial observation
-        print episode
+        print(episode)
         env.reset(np.random.randint(0,10), np.random.randint(0,10))
         #observation = env.reset()
         observation = np.array(env.state)
@@ -95,7 +95,7 @@ def run_random():
     profit_estimation = 0
     for episode in range(total_episode):
         # initial observation
-        print episode
+        print(episode)
         env.reset(np.random.randint(0,10), np.random.randint(0,10))
         #observation = env.reset()
         observation = np.array(env.state)

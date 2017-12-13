@@ -7,11 +7,11 @@ def run_stock():
     step = 0
     win = 0
     lose = 0
-    total_episode = 100
+    total_episode = 2000
     profit_estimation = 0
     for episode in range(total_episode):
         # initial observation
-        print episode
+        print(episode)
         env.reset(np.random.randint(0,10), np.random.randint(0,10))
         #observation = env.reset()
         observation = np.array(env.state)

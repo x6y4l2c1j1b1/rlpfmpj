@@ -33,6 +33,8 @@ class DeepQNetwork:
 
         # total learning step
         self.learn_step_counter = 0
+        # initial saver
+        #self.saver = tf.train.Saver()
 
         # initialize zero memory [s, a, r, s_]
         self.memory = np.zeros((self.memory_size, n_features * 2 + 2))
@@ -128,12 +130,15 @@ class DeepQNetwork:
         action = np.argmax(actions_value)
         return action
 
+    def save_model(self, name):
+        savepath = tf.train.Saver().save(self.sess, "./"+name+".ckpt")
+        print(name + " has been saved")
 
     def learn(self):
         # check to replace target parameters
         if self.learn_step_counter % self.replace_target_iter == 0:
             self.sess.run(self.replace_target_op)
-            # print('\ntarget_params_replaced\n')
+            #print('\ntarget_params_replaced\n')
 
         # sample batch memory from all memory
         if self.memory_counter > self.memory_size:

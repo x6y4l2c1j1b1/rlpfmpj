@@ -51,6 +51,7 @@ class DeepQNetwork:
             tf.summary.FileWriter("logs/", self.sess.graph)
 
         self.sess.run(tf.global_variables_initializer())
+        self.saver = tf.train.Saver()
         self.cost_his = []
 
     def _build_net(self):
@@ -127,7 +128,11 @@ class DeepQNetwork:
         actions_value = self.sess.run(self.q_eval, feed_dict={self.s: observation})
         action = np.argmax(actions_value)
         return action
-
+    
+    def save_model(self):
+        savepath = self.saver.save(self.sess, "./model.ckpt")
+        print("model has been saved")
+        
 
     def learn(self):
         # check to replace target parameters

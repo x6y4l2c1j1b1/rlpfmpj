@@ -13,11 +13,8 @@ def run_stock():
         # initial observation
         print(episode)
         env.reset(np.random.randint(0,10), np.random.randint(0,10))
-        #observation = env.reset()
         observation = np.array(env.state)
         while True:
-            # fresh env
-            #env.render()
 
             # RL choose action based on observation
             action = RL.choose_action(observation)
@@ -59,11 +56,8 @@ def test_stock():
         # initial observation
         print(episode)
         env.reset(np.random.randint(0,10), np.random.randint(0,10))
-        #observation = env.reset()
         observation = np.array(env.state)
         while True:
-            # fresh env
-            #env.render()
 
             # RL choose action based on observation
             action = RL.choose_greedy_action(observation)
@@ -97,11 +91,9 @@ def run_random():
         # initial observation
         print(episode)
         env.reset(np.random.randint(0,10), np.random.randint(0,10))
-        #observation = env.reset()
         observation = np.array(env.state)
         while True:
             # fresh env
-            #env.render()
 
             # RL choose action based on observation
             action = np.random.randint(0,7)
@@ -121,13 +113,11 @@ def run_random():
             lose += 1
         profit_estimation = (profit_estimation * episode + (observation[0] - 1000000.))/(episode+1.)
 
-    # end of game
         print('total_value: %d, profit_estimation: %d' % (observation[0], profit_estimation))
     print('random, win: %d, lose: %d, profit_estimation: %d' % (win, lose, profit_estimation))
 
 
 if __name__ == "__main__":
-    # maze game
     env = Env()
     n_actions = 7
     n_features = 8

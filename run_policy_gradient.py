@@ -27,7 +27,7 @@ import matplotlib.pyplot as plt
 # print(env.observation_space.high)
 # print(env.observation_space.low)
 
-n_actions  = 150
+n_actions  = len(np.arange(-0.25,0.25,0.01))
 n_features = 8
 
 def run_stock():

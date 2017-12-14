@@ -16,7 +16,7 @@ class Env(object):
         self.hi_data = []
         self.low_data = []
         self.Hi_Li = "" #store merged data contain hi and lo data
-        self.actions = np.arange(-0.75,0.75,0.01) #action list
+        self.actions = np.arange(-0.25,0.25,0.01) #action list
         self.index_hi = -1  #high_beta stock index
         self.index_lo  = -1 #low_beta stock index
         

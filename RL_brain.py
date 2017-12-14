@@ -130,7 +130,7 @@ class DeepQNetwork:
         return action
     
     def save_model(self):
-        savepath = self.saver.save(self.sess, "./model.ckpt")
+        savepath = self.saver.save(self.sess, "./model_1000.ckpt")
         print("model has been saved")
         
 

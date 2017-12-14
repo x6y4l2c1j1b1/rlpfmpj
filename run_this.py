@@ -7,7 +7,7 @@ def run_stock():
     step = 0
     win = 0
     lose = 0
-    total_episode = 2
+    total_episode = 1000
     profit_estimation = 0
     for episode in range(total_episode):
         # initial observation
@@ -51,7 +51,7 @@ def test_stock():
     step = 0
     win = 0
     lose = 0
-    total_episode = 2
+    total_episode = 1000
     profit_estimation = 0
     profits = []
     actions = [0,0,0,0,0,0,0]
@@ -93,7 +93,7 @@ def run_random():
     step = 0
     win = 0
     lose = 0
-    total_episode = 2
+    total_episode = 1000
     profit_estimation = 0
     profits = []
     actions = [0,0,0,0,0,0,0]

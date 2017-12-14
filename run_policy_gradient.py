@@ -11,7 +11,7 @@ gym: 0.8.0
 """
 
 from RL_brain_policy_gradient import PolicyGradient
-from env_new import Env
+from env_new_high_a import Env
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -27,7 +27,7 @@ import matplotlib.pyplot as plt
 # print(env.observation_space.high)
 # print(env.observation_space.low)
 
-n_actions = 7
+n_actions  = 150
 n_features = 8
 
 def run_stock():

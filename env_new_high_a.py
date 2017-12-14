@@ -5,7 +5,7 @@ import pandas as pd
 from collections import defaultdict
 import math
 
-class Env(object):
+class Env(object, actions):
     
     def __init__(self):
         high_beta_path =  r'Data/rawdata/high_beta'
@@ -16,7 +16,7 @@ class Env(object):
         self.hi_data = []
         self.low_data = []
         self.Hi_Li = "" #store merged data contain hi and lo data
-        self.actions = np.arange(-0.25,0.25,0.01) #action list
+        self.actions = actions#action list
         self.index_hi = -1  #high_beta stock index
         self.index_lo  = -1 #low_beta stock index
         

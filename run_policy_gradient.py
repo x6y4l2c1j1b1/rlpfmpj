@@ -26,8 +26,8 @@ import matplotlib.pyplot as plt
 # print(env.observation_space)
 # print(env.observation_space.high)
 # print(env.observation_space.low)
-
-n_actions  = len(np.arange(-0.25,0.25,0.01))
+actions = np.arange(-0.25,0.25,0.01)
+n_actions  = len(actions)
 n_features = 8
 
 def run_stock():
@@ -113,7 +113,7 @@ def test():
     print('test, win: %d, lose: %d, profit_estimation: %d' % (win, lose, profit_estimation))
 
 if __name__ == '__main__':
-    env = Env()
+    env = Env(actions = actions)
     RL = PolicyGradient(
         n_actions=n_actions,
         n_features=n_features,

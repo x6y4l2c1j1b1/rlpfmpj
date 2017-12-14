@@ -7,7 +7,7 @@ def run_stock():
     step = 0
     win = 0
     lose = 0
-    total_episode = 2000
+    total_episode = 2
     profit_estimation = 0
     for episode in range(total_episode):
         # initial observation
@@ -43,6 +43,7 @@ def run_stock():
 
     # end of game
         print('total_value: %d, profit_estimation: %d' % (observation[0], profit_estimation))
+    RL.save_model()
     print('train, win: %d, lose: %d, profit_estimation: %d' % (win, lose, profit_estimation))
     #env.destroy()
 
@@ -50,8 +51,10 @@ def test_stock():
     step = 0
     win = 0
     lose = 0
-    total_episode = 100
+    total_episode = 2
     profit_estimation = 0
+    profits = []
+    actions = [0,0,0,0,0,0,0]
     for episode in range(total_episode):
         # initial observation
         print(episode)
@@ -61,6 +64,8 @@ def test_stock():
 
             # RL choose action based on observation
             action = RL.choose_greedy_action(observation)
+            #count the action
+            actions[action] = actions[action] + 1
             # RL take action and get next observation and reward
             observation_, reward, done = env.take_action(action)
             observation_ = np.array(observation_)
@@ -75,18 +80,23 @@ def test_stock():
             win += 1
         else:
             lose += 1
+        profits.append(observation[0] - 1000000.0)
         profit_estimation = (profit_estimation * episode + (observation[0] - 1000000.))/(episode+1.)
 
     # end of game
         print('total_value: %d, profit_estimation: %d' % (observation[0], profit_estimation))
+    np.savetxt("profits_test.csv",np.array(profits),delimiter=",")
+    np.savetxt("actions_test.csv",np.array(actions),delimiter=",")
     print('test, win: %d, lose: %d, profit_estimation: %d' % (win, lose, profit_estimation))
 
 def run_random():
     step = 0
     win = 0
     lose = 0
-    total_episode = 2000
+    total_episode = 2
     profit_estimation = 0
+    profits = []
+    actions = [0,0,0,0,0,0,0]
     for episode in range(total_episode):
         # initial observation
         print(episode)
@@ -97,6 +107,8 @@ def run_random():
 
             # RL choose action based on observation
             action = np.random.randint(0,7)
+            #count actions
+            actions[action] = actions[action] + 1
             # RL take action and get next observation and reward
             observation_, reward, done = env.take_action(action)
             observation_ = np.array(observation_)
@@ -112,8 +124,10 @@ def run_random():
         else:
             lose += 1
         profit_estimation = (profit_estimation * episode + (observation[0] - 1000000.))/(episode+1.)
-
+        profits.append(observation[0] - 1000000.)
         print('total_value: %d, profit_estimation: %d' % (observation[0], profit_estimation))
+    np.savetxt("profits_rand.csv",np.array(profits),delimiter=",")
+    np.savetxt("actions_rand.csv",np.array(actions),delimiter=",")
     print('random, win: %d, lose: %d, profit_estimation: %d' % (win, lose, profit_estimation))
 
 
@@ -130,7 +144,7 @@ if __name__ == "__main__":
                       # output_graph=True
                       )
     
- #   run_stock()
- #   test_stock()
+    run_stock()
+    test_stock()
     run_random()
-    RL.plot_cost()
+ #   RL.plot_cost()

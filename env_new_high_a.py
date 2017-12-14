@@ -5,9 +5,9 @@ import pandas as pd
 from collections import defaultdict
 import math
 
-class Env(object, actions):
+class Env(object):
     
-    def __init__(self):
+    def __init__(self, actions):
         high_beta_path =  r'Data/rawdata/high_beta'
         low_beta_path  =  r'Data/rawdata/low_beta'
         high_beta_file_names = glob.glob(high_beta_path+"/*.csv")

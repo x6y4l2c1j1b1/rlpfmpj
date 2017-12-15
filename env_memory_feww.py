@@ -59,7 +59,7 @@ class Env(object):
         self.lc = lc #save to global 
         
         #generate state and save to global 
-        self.state = [tv, shareHi, shareLo, lc, Hi_Li.loc[1]["Close_x"], Hi_Li.loc[1]["Close_y"], Hi_Li.loc[0]["Close_x"], Hi_Li.loc[0]["Close_y"], Hi_Li.loc[2]["Close_x"], Hi_Li.loc[2]["Close_y"]]
+        self.state = [ shareHi, shareLo, Hi_Li.loc[2]["Close_x"], Hi_Li.loc[2]["Close_y"] ] 
 
     def take_action(self, a):
         
@@ -73,8 +73,8 @@ class Env(object):
         Hi_Li = self.Hi_Li
         lc  = self.lc           #current leftover cash 
         
-        shareHi = cstate[1] #current share of high beta stock 
-        shareLo = cstate[2] #current share of low beta stock 
+        shareHi = cstate[0] #current share of high beta stock 
+        shareLo = cstate[1] #current share of low beta stock 
         
         if action > 0:#sell low buy high:
             
@@ -120,7 +120,7 @@ class Env(object):
         #print "new_TV: " + str(new_tv)
         reward  = new_tv - ctv 
         
-        new_state = [new_tv, shareHi, shareLo, lc, chp, clp, cstate[4], cstate[5], new_chp, new_clp] 
+        new_state = [shareHi, shareLo, new_chp, new_clp] 
         
         self.state =  new_state #update current state 
         self.t  = ct + 1        #update current timestamp

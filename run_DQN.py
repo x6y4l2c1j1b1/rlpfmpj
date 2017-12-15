@@ -7,7 +7,7 @@ def run_stock():
     step = 0
     win = 0
     lose = 0
-    total_episode = 2000
+    total_episode = 100
     profit_estimation = 0
     for episode in range(total_episode):
         # initial observation

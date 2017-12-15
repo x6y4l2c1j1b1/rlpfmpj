@@ -7,7 +7,7 @@ import math
 
 class Env(object):
     
-    def __init__(self):
+    def __init__(self, actions):
         high_beta_path =  r'Data/rawdata/high_beta'
         low_beta_path  =  r'Data/rawdata/low_beta'
         high_beta_file_names = glob.glob(high_beta_path+"/*.csv")
@@ -16,7 +16,7 @@ class Env(object):
         self.hi_data = []
         self.low_data = []
         self.Hi_Li = "" #store merged data contain hi and lo data
-        self.actions = [-0.25, -0.1, -0.05, 0, 0.05, 0.1, 0.25] #action list
+        self.actions = actions#action list
         self.index_hi = -1  #high_beta stock index
         self.index_lo  = -1 #low_beta stock index
         
@@ -59,7 +59,7 @@ class Env(object):
         self.lc = lc #save to global 
         
         #generate state and save to global 
-        self.state = [ shareHi, shareLo, Hi_Li.loc[2]["Close_x"], Hi_Li.loc[2]["Close_y"] ] 
+        self.state = [shareHi, shareLo, Hi_Li.loc[2]["Close_x"], Hi_Li.loc[2]["Close_y"]]
 
     def take_action(self, a):
         

@@ -11,7 +11,8 @@ gym: 0.8.0
 """
 
 from RL_brain_policy_gradient import PolicyGradient
-from env_new_high_a import Env
+# from env_new_high_a import Env
+from env_memory_feww import Env
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -26,7 +27,7 @@ import matplotlib.pyplot as plt
 # print(env.observation_space)
 # print(env.observation_space.high)
 # print(env.observation_space.low)
-actions = np.arange(-0.25,0.25,0.01)
+actions = np.arange(-0.3,0.3,0.05)
 n_actions  = len(actions)
 n_features = 8
 

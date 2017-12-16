@@ -141,6 +141,43 @@ def test():
         print('total_value: %d, profit_estimation: %d' % (env.tv, profit_estimation))
     print('test, win: %d, lose: %d, profit_estimation: %d' % (win, lose, profit_estimation))
 
+
+def random():
+    win = 0
+    lose = 0
+    total_episode = 100
+    profit_estimation = 0
+
+    profits = []
+
+    for i_episode in range(total_episode):
+
+        env.reset(np.random.randint(0,10), np.random.randint(0,10))
+        observation = np.array(env.state)
+
+        while True:
+
+            action = np.random.randint(0,n_actions)
+
+            observation_, reward, done= env.take_action(action)
+            observation_ = np.array(observation_)
+
+            RL.store_transition(observation, action, reward)
+
+            if done:
+                break
+
+            observation = observation_
+
+        if env.tv >= 1000000:
+            win += 1
+        else:
+            lose += 1
+
+        profit_estimation = (profit_estimation * i_episode + (env.tv - 1000000.))/(i_episode+1.)
+        print('total_value: %d, profit_estimation: %d' % (env.tv, profit_estimation))
+    print('test, win: %d, lose: %d, profit_estimation: %d' % (win, lose, profit_estimation))
+
 if __name__ == '__main__':
     env = Env(actions = actions)
     RL = PolicyGradient(
@@ -153,5 +190,6 @@ if __name__ == '__main__':
         reward_decay=0.99,
         # output_graph=True,
     )
-    run_stock()
-    test()
+    #run_stock()
+    #test()
+    random()

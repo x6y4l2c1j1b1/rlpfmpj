@@ -10,7 +10,7 @@ Tensorflow: 1.0
 gym: 0.8.0
 """
 
-from RL_brain_policy_gradient import PolicyGradient
+from RL_brain_policy_gradient_lstm import PolicyGradient
 # from env_new_high_a import Env
 from env_memory_feww import Env
 import numpy as np
@@ -29,7 +29,7 @@ import matplotlib.pyplot as plt
 # print(env.observation_space.low)
 actions = np.arange(-0.3,0.3,0.05)
 n_actions  = len(actions)
-n_features = 8
+n_features = 4
 
 def run_stock():
     total_episode = 100
@@ -60,7 +60,32 @@ def run_stock():
                 # if running_reward > DISPLAY_REWARD_THRESHOLD: RENDER = True     # rendering
                 print("episode:", i_episode, "  reward:", int(running_reward))
 
-                vt = RL.learn()
+
+                # if i_episode == 0:
+                #     feed_dict = {
+                #             RL.tf_obs: np.vstack(RL.ep_obs),  # shape=[None, n_obs]
+                #             RL.tf_acts: np.array(RL.ep_as),  # shape=[None, ]
+                #             RL.tf_vt: discounted_ep_rs_norm,  # shape=[None, ]
+                #             # create initial state
+                #     }
+                # else:
+                #     feed_dict = {
+                #         RL.tf_obs: np.vstack(RL.ep_obs),  # shape=[None, n_obs]
+                #         RL.tf_acts: np.array(RL.ep_as),  # shape=[None, ]
+                #         RL.tf_vt: discounted_ep_rs_norm,  # shape=[None, ]
+                #         RL.cell_init_state: state    # use last state as the initial state for this run
+                #     }
+
+                # discounted_ep_rs_norm = RL._discount_and_norm_rewards()
+
+
+                # # train on episode
+                # _, state = sess.run(RL.train_op, RL.cell_final_state, feed_dict=feed_dict)
+
+                # RL.ep_obs, RL.ep_as, RL.ep_rs = [], [], [] 
+
+                # vt = discounted_ep_rs_norm
+                vt = RL.learn(i_episode)
 
                 # if i_episode == 0:
                 #     plt.plot(vt)    # plot the episode vt
@@ -116,8 +141,10 @@ def test():
 if __name__ == '__main__':
     env = Env(actions = actions)
     RL = PolicyGradient(
+        n_steps = 47,
         n_actions=n_actions,
         n_features=n_features,
+        batch_size = 50,
         learning_rate=0.02,
         reward_decay=0.99,
         # output_graph=True,

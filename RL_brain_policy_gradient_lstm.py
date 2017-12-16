@@ -39,8 +39,10 @@ class PolicyGradient:
         self.lr = learning_rate
         self.gamma = reward_decay
 
+
         self.ep_obs, self.ep_as, self.ep_rs = [], [], []
 
+        self.state = None #### update cell_final_state
 
 
         self._build_net()
@@ -126,17 +128,34 @@ class PolicyGradient:
         self.ep_as.append(a)
         self.ep_rs.append(r)
 
-    def learn(self):
+    def learn(self, i_episode):
         # discount and normalize episode reward
+
+        if i_episode == 0:
+            feed_dict = {
+                    RL.tf_obs: np.vstack(RL.ep_obs),  # shape=[None, n_obs]
+                    RL.tf_acts: np.array(RL.ep_as),  # shape=[None, ]
+                    RL.tf_vt: discounted_ep_rs_norm,  # shape=[None, ]
+                    # create initial state
+            }
+        else:
+            feed_dict = {
+                RL.tf_obs: np.vstack(RL.ep_obs),  # shape=[None, n_obs]
+                RL.tf_acts: np.array(RL.ep_as),  # shape=[None, ]
+                RL.tf_vt: discounted_ep_rs_norm,  # shape=[None, ]
+                RL.cell_init_state: self.state    # use last state as the initial state for this run
+            }
+
         discounted_ep_rs_norm = self._discount_and_norm_rewards()
 
+        self.sess.run(RL.train_op, RL.cell_final_state, feed_dict=feed_dict)
 
         # train on episode
-        self.sess.run(self.train_op, feed_dict={
-             self.tf_obs: np.vstack(self.ep_obs),  # shape=[None, n_obs]
-             self.tf_acts: np.array(self.ep_as),  # shape=[None, ]
-             self.tf_vt: discounted_ep_rs_norm,  # shape=[None, ]
-        })
+        # self.sess.run(self.train_op, feed_dict={
+        #      self.tf_obs: np.vstack(self.ep_obs),  # shape=[None, n_obs]
+        #      self.tf_acts: np.array(self.ep_as),  # shape=[None, ]
+        #      self.tf_vt: discounted_ep_rs_norm,  # shape=[None, ]
+        # })
 
         self.ep_obs, self.ep_as, self.ep_rs = [], [], []    # empty episode data
         return discounted_ep_rs_norm

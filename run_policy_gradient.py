@@ -99,13 +99,13 @@ def run_stock():
 
             observation = observation_
 
-        if observation[0] >= 1000000:
+        if env.tv >= 1000000:
             win += 1
         else:
             lose += 1
 
-        profit_estimation = (profit_estimation * i_episode + (observation[0] - 1000000.))/(i_episode+1.)
-        print('total_value: %d, profit_estimation: %d' % (observation[0], profit_estimation))
+        profit_estimation = (profit_estimation * i_episode + (env.tv - 1000000.))/(i_episode+1.)
+        print('total_value: %d, profit_estimation: %d' % (env.tv, profit_estimation))
     print('train, win: %d, lose: %d, profit_estimation: %d' % (win, lose, profit_estimation))
 
 def test():
@@ -132,13 +132,13 @@ def test():
 
             observation = observation_
 
-        if observation[0] >= 1000000:
+        if env.tv >= 1000000:
             win += 1
         else:
             lose += 1
 
-        profit_estimation = (profit_estimation * i_episode + (observation[0] - 1000000.))/(i_episode+1.)
-        print('total_value: %d, profit_estimation: %d' % (observation[0], profit_estimation))
+        profit_estimation = (profit_estimation * i_episode + (env.tv - 1000000.))/(i_episode+1.)
+        print('total_value: %d, profit_estimation: %d' % (env.tv, profit_estimation))
     print('test, win: %d, lose: %d, profit_estimation: %d' % (win, lose, profit_estimation))
 
 if __name__ == '__main__':

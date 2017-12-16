@@ -97,7 +97,7 @@ class PolicyGradient:
     def add_cell(self):
         lstm_cell = tf.contrib.rnn.BasicLSTMCell(self.cell_size, forget_bias=1.0, state_is_tuple=True)
         with tf.name_scope('initial_state'):
-            self.cell_init_state = lstm_cell.zero_state(self.batch_size, dtype=tf.float32)
+            self.cell_init_state = lstm_cell.zero_state(self. batch_size, dtype=tf.float32)
         
         self.cell_outputs, self.cell_final_state = tf.nn.dynamic_rnn(
             lstm_cell, self.l_in_y, initial_state=self.cell_init_state, time_major=False)
@@ -134,6 +134,7 @@ class PolicyGradient:
 
 
     def choose_action(self, observation):
+
         prob_weights = self.sess.run(self.all_act_prob, feed_dict={self.tf_obs: observation[np.newaxis, :]})
         action = np.random.choice(range(prob_weights.shape[1]), p=prob_weights.ravel())  # select action w.r.t the actions prob
         return action

@@ -145,6 +145,7 @@ if __name__ == '__main__':
         n_actions=n_actions,
         n_features=n_features,
         batch_size = 50,
+        cell_size = 10,
         learning_rate=0.02,
         reward_decay=0.99,
         # output_graph=True,

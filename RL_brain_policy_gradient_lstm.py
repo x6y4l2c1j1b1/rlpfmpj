@@ -62,18 +62,39 @@ class PolicyGradient:
             self.tf_obs = tf.placeholder(tf.float32, [None, self.n_features], name="observations")
             self.tf_acts = tf.placeholder(tf.int32, [None, ], name="actions_num")
             self.tf_vt = tf.placeholder(tf.float32, [None, ], name="actions_value")
-        # fc1
-        l_in_x = tf.reshape(self.tf_obs, [-1, self.input_size], name='2_2D')  # (batch*n_step, in_size)
 
-        Ws_in = self._weight_variable([self.input_size, self.cell_size])
+        with tf.variable_scope('in_hidden'):
+            self.add_input_layer()
+        with tf.variable_scope('LSTM_cell'):
+            self.add_cell()
+        with tf.variable_scope('out_hidden'):
+            self.add_output_layer()
 
+        with tf.name_scope('loss'):
+            # to maximize total reward (log_p * R) is to minimize -(log_p * R), and the tf only have minimize(loss)
+            neg_log_prob = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=self.all_act, labels=self.tf_acts)   # this is negative log of chosen action
+            # or in this way:
+            # neg_log_prob = tf.reduce_sum(-tf.log(self.all_act_prob)*tf.one_hot(self.tf_acts, self.n_actions), axis=1)
+            loss = tf.reduce_mean(neg_log_prob * self.tf_vt)  # reward guided loss
+
+        with tf.name_scope('train'):
+            self.train_op = tf.train.AdamOptimizer(self.lr).minimize(loss)
+
+    def add_input_layer(self):
+        l_in_x = tf.reshape(self.tf_obs, [-1, self.n_features], name='2_2D')  # (batch*n_step, in_size)
+
+        Ws_in = self._weight_variable([self.n_features, self.cell_size])
         bs_in = self._bias_variable([self.cell_size,])
+
 
         with tf.name_scope('Wx_plus_b'):
             l_in_y = tf.matmul(l_in_x, Ws_in) + bs_in
         # reshape l_in_y ==> (batch, n_steps, cell_size)
+        print(l_in_y.shape)
         self.l_in_y = tf.reshape(l_in_y, [-1, self.n_steps, self.cell_size], name='2_3D')
+        print(self.l_in_y.shape)
 
+    def add_cell(self):
         lstm_cell = tf.contrib.rnn.BasicLSTMCell(self.cell_size, forget_bias=1.0, state_is_tuple=True)
         with tf.name_scope('initial_state'):
             self.cell_init_state = lstm_cell.zero_state(self.batch_size, dtype=tf.float32)
@@ -81,9 +102,11 @@ class PolicyGradient:
         self.cell_outputs, self.cell_final_state = tf.nn.dynamic_rnn(
             lstm_cell, self.l_in_y, initial_state=self.cell_init_state, time_major=False)
 
+    def add_output_layer(self):
         l_out_x = tf.reshape(self.cell_outputs, [-1, self.cell_size], name='2_2D')
-        Ws_out = self._weight_variable([self.cell_size, self.output_size])
-        bs_out = self._bias_variable([self.output_size, ])
+        
+        Ws_out = self._weight_variable([self.cell_size, self.n_actions])
+        bs_out = self._bias_variable([self.n_actions, ])
         # shape = (batch * steps, output_size)
         with tf.name_scope('Wx_plus_b'):
             self.all_act = tf.matmul(l_out_x, Ws_out) + bs_out
@@ -108,15 +131,7 @@ class PolicyGradient:
 
         self.all_act_prob = tf.nn.softmax(self.all_act, name='act_prob')  # use softmax to convert to probability
 
-        with tf.name_scope('loss'):
-            # to maximize total reward (log_p * R) is to minimize -(log_p * R), and the tf only have minimize(loss)
-            neg_log_prob = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=self.all_act, labels=self.tf_acts)   # this is negative log of chosen action
-            # or in this way:
-            # neg_log_prob = tf.reduce_sum(-tf.log(self.all_act_prob)*tf.one_hot(self.tf_acts, self.n_actions), axis=1)
-            loss = tf.reduce_mean(neg_log_prob * self.tf_vt)  # reward guided loss
 
-        with tf.name_scope('train'):
-            self.train_op = tf.train.AdamOptimizer(self.lr).minimize(loss)
 
     def choose_action(self, observation):
         prob_weights = self.sess.run(self.all_act_prob, feed_dict={self.tf_obs: observation[np.newaxis, :]})
@@ -130,25 +145,26 @@ class PolicyGradient:
 
     def learn(self, i_episode):
         # discount and normalize episode reward
+        print('learn')
 
         if i_episode == 0:
             feed_dict = {
-                    RL.tf_obs: np.vstack(RL.ep_obs),  # shape=[None, n_obs]
-                    RL.tf_acts: np.array(RL.ep_as),  # shape=[None, ]
-                    RL.tf_vt: discounted_ep_rs_norm,  # shape=[None, ]
+                    self.tf_obs: np.vstack(self.ep_obs),  # shape=[None, n_obs]
+                    self.tf_acts: np.array(self.ep_as),  # shape=[None, ]
+                    self.tf_vt: discounted_ep_rs_norm,  # shape=[None, ]
                     # create initial state
             }
         else:
             feed_dict = {
-                RL.tf_obs: np.vstack(RL.ep_obs),  # shape=[None, n_obs]
-                RL.tf_acts: np.array(RL.ep_as),  # shape=[None, ]
-                RL.tf_vt: discounted_ep_rs_norm,  # shape=[None, ]
-                RL.cell_init_state: self.state    # use last state as the initial state for this run
+                self.tf_obs: np.vstack(self.ep_obs),  # shape=[None, n_obs]
+                self.tf_acts: np.array(self.ep_as),  # shape=[None, ]
+                self.tf_vt: discounted_ep_rs_norm,  # shape=[None, ]
+                self.cell_init_state: self.state    # use last state as the initial state for this run
             }
 
         discounted_ep_rs_norm = self._discount_and_norm_rewards()
 
-        self.sess.run(RL.train_op, RL.cell_final_state, feed_dict=feed_dict)
+        self.sess.run(RL.train_op, self.cell_final_state, feed_dict=feed_dict)
 
         # train on episode
         # self.sess.run(self.train_op, feed_dict={

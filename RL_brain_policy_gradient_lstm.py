@@ -43,6 +43,7 @@ class PolicyGradient:
         self.ep_obs, self.ep_as, self.ep_rs = [], [], []
 
         self.state = None #### update cell_final_state
+        self.mc_state = None
 
 
         self._build_net()
@@ -60,7 +61,7 @@ class PolicyGradient:
     def _build_net(self):
         with tf.name_scope('inputs'):
             self.tf_obs = tf.placeholder(tf.float32, [None, self.n_features], name="observations")
-            self.tf_acts = tf.placeholder(tf.int32, [None, ], name="actions_num")
+            self.tf_acts = tf.placeholder(tf.int32, shape=(), name="actions_num")
             self.tf_vt = tf.placeholder(tf.float32, [None, ], name="actions_value")
 
         with tf.variable_scope('in_hidden'):
@@ -72,9 +73,9 @@ class PolicyGradient:
 
         with tf.name_scope('loss'):
             # to maximize total reward (log_p * R) is to minimize -(log_p * R), and the tf only have minimize(loss)
-            neg_log_prob = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=self.all_act, labels=self.tf_acts)   # this is negative log of chosen action
+            #neg_log_prob = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=self.all_act, labels=self.tf_acts)   # this is negative log of chosen action
             # or in this way:
-            # neg_log_prob = tf.reduce_sum(-tf.log(self.all_act_prob)*tf.one_hot(self.tf_acts, self.n_actions), axis=1)
+            neg_log_prob = tf.reduce_sum(-tf.log(self.all_act_prob)*tf.one_hot(self.tf_acts, self.n_actions), axis=1)
             loss = tf.reduce_mean(neg_log_prob * self.tf_vt)  # reward guided loss
 
         with tf.name_scope('train'):
@@ -97,7 +98,7 @@ class PolicyGradient:
     def add_cell(self):
         lstm_cell = tf.contrib.rnn.BasicLSTMCell(self.cell_size, forget_bias=1.0, state_is_tuple=True)
         with tf.name_scope('initial_state'):
-            self.cell_init_state = lstm_cell.zero_state(self. batch_size, dtype=tf.float32)
+            self.cell_init_state = lstm_cell.zero_state(self.batch_size, dtype=tf.float32)
         
         self.cell_outputs, self.cell_final_state = tf.nn.dynamic_rnn(
             lstm_cell, self.l_in_y, initial_state=self.cell_init_state, time_major=False)
@@ -133,10 +134,28 @@ class PolicyGradient:
 
 
 
-    def choose_action(self, observation):
 
-        prob_weights = self.sess.run(self.all_act_prob, feed_dict={self.tf_obs: observation[np.newaxis, :]})
+
+    def choose_action(self, observation, action_index, episode):
+        # self.n_steps = 1
+        # self.batch_size = 1
+        if episode == 0 and action_index == 0:
+            feed_dict_ = {
+                self.tf_obs: observation[np.newaxis, :],  # shape=[None, n_obs]
+                    # create initial state
+            }
+        else:
+            feed_dict_ = {
+                self.tf_obs: observation[np.newaxis, :],  # shape=[None, n_obs]
+                self.cell_init_state: self.mc_state,    # use last state as the initial state for this run
+            }
+
+        prob_weights, self.mc_state = self.sess.run([self.all_act_prob, self.cell_final_state], feed_dict=feed_dict_)
         action = np.random.choice(range(prob_weights.shape[1]), p=prob_weights.ravel())  # select action w.r.t the actions prob
+
+        # self.n_steps = 50
+        # self.batch_size = 47
+
         return action
 
     def store_transition(self, s, a, r):
@@ -148,24 +167,42 @@ class PolicyGradient:
         # discount and normalize episode reward
         print('learn')
 
-        if i_episode == 0:
-            feed_dict = {
-                    self.tf_obs: np.vstack(self.ep_obs),  # shape=[None, n_obs]
-                    self.tf_acts: np.array(self.ep_as),  # shape=[None, ]
-                    self.tf_vt: discounted_ep_rs_norm,  # shape=[None, ]
-                    # create initial state
-            }
-        else:
-            feed_dict = {
-                self.tf_obs: np.vstack(self.ep_obs),  # shape=[None, n_obs]
-                self.tf_acts: np.array(self.ep_as),  # shape=[None, ]
-                self.tf_vt: discounted_ep_rs_norm,  # shape=[None, ]
-                self.cell_init_state: self.state    # use last state as the initial state for this run
-            }
-
         discounted_ep_rs_norm = self._discount_and_norm_rewards()
 
-        self.sess.run(RL.train_op, self.cell_final_state, feed_dict=feed_dict)
+
+        for i in range(len(self.ep_obs)):
+            observation = self.ep_obs[i]
+            action = self.ep_as[i]
+
+            if i_episode == 0:
+                feed_dict = {
+                        self.tf_obs: observation[np.newaxis, :],  # shape=[None, n_obs]
+                        self.tf_acts: action,  # shape=[None, ]
+                        self.tf_vt: discounted_ep_rs_norm,  # shape=[None, ]
+                        # create initial state
+                }
+            else:
+                feed_dict = {
+                    self.tf_obs: observation[np.newaxis, :],  # shape=[None, n_obs]
+                    self.tf_acts: action,  # shape=[None, ]
+                    self.tf_vt: discounted_ep_rs_norm,  # shape=[None, ]
+                    self.cell_init_state: self.state    # use last state as the initial state for this run
+                }
+            # if i_episode == 0:
+            #     feed_dict = {
+            #             self.tf_obs: np.vstack(self.ep_obs),  # shape=[None, n_obs]
+            #             self.tf_acts: np.array(self.ep_as),  # shape=[None, ]
+            #             self.tf_vt: discounted_ep_rs_norm,  # shape=[None, ]
+            #             # create initial state
+            #     }
+            # else:
+            #     feed_dict = {
+            #         self.tf_obs: np.vstack(self.ep_obs),  # shape=[None, n_obs]
+            #         self.tf_acts: np.array(self.ep_as),  # shape=[None, ]
+            #         self.tf_vt: discounted_ep_rs_norm,  # shape=[None, ]
+            #         self.cell_init_state: self.state    # use last state as the initial state for this run
+            #     }
+            _, self.state = self.sess.run([self.train_op, self.cell_final_state], feed_dict=feed_dict)
 
         # train on episode
         # self.sess.run(self.train_op, feed_dict={

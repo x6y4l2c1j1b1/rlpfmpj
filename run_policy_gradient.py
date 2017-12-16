@@ -41,9 +41,12 @@ def run_stock():
         env.reset(np.random.randint(0,10), np.random.randint(0,10))
         observation = np.array(env.state)
 
+        action_index = 0
         while True:
 
-            action = RL.choose_action(observation)
+            action = RL.choose_action(observation,action_index,i_episode)
+
+            action_index += 1
 
             observation_, reward, done= env.take_action(action)
             observation_ = np.array(observation_)
@@ -141,10 +144,10 @@ def test():
 if __name__ == '__main__':
     env = Env(actions = actions)
     RL = PolicyGradient(
-        n_steps = 47,
+        n_steps = 1,
         n_actions=n_actions,
         n_features=n_features,
-        batch_size = 50,
+        batch_size = 1,
         cell_size = 10,
         learning_rate=0.02,
         reward_decay=0.99,

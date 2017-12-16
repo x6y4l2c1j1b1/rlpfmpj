@@ -38,7 +38,7 @@ class Env(object):
         Li_Data = self.low_data[lo]
         
         Hi_Li = pd.merge(Hi_Data,Li_Data,on="Date")
-        self.Hi_Li = Hi_Li
+        self.Hi_Li = Hi_Li.loc[range(0,2388)]
         self.t = 2
         
         #shareHi = 1000

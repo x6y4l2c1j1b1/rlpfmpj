@@ -28,6 +28,7 @@ class Env(object):
             self.hi_data.append(pd.read_csv(high_beta_file_names[hi]))
         for lo in range(len(low_beta_file_names)):
             self.low_data.append(pd.read_csv(low_beta_file_names[lo]))
+        self.rs = [] #sharp ratio
 
     
     def reset(self, hi, lo):#create env object, using high_beta stock(index: hi) and low_beta stock(index: lo)
@@ -60,6 +61,10 @@ class Env(object):
         
         #generate state and save to global 
         self.state = [shareHi, shareLo, Hi_Li.loc[2]["Close_x"], Hi_Li.loc[2]["Close_y"]]
+
+        #sharp ratio
+        self.rs = [ lc + shareHi * Hi_Li.loc[1]["Close_x"] + shareLo * Hi_Li.loc[1]["Close_y"] ]
+
 
     def take_action(self, a):
         
@@ -127,4 +132,8 @@ class Env(object):
         self.lc = lc            #current leftover cash
         self.tv = new_tv        #current total value
         
+        #sharp ratio
+        self.rs.append(reward)
+        reward = np.mean(self.rs) * 1.0 / np.std(self.rs)
+
         return new_state, reward, self.t == (Hi_Li.shape[0] - 1)

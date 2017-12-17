@@ -42,6 +42,9 @@ def run_stock():
         observation = np.array(env.state)
 
         action_index = 0
+
+        ten_year_profits = []
+
         while True:
 
             action = RL.choose_action(observation,action_index,i_episode)
@@ -52,6 +55,8 @@ def run_stock():
             observation_ = np.array(observation_)
 
             RL.store_transition(observation, action, reward)
+
+
 
             if done:
                 ep_rs_sum = sum(RL.ep_rs)
@@ -104,23 +109,39 @@ def run_stock():
         else:
             lose += 1
 
-        profit_estimation = (profit_estimation * i_episode + (env.tv - 1000000.))/(i_episode+1.)
-        print('total_value: %d, profit_estimation: %d' % (env.tv, profit_estimation))
-    print('train, win: %d, lose: %d, profit_estimation: %d' % (win, lose, profit_estimation))
+        ten_year_profit = env.tv - 1000000.
+        ten_year_profits.append(ten_year_profit)
+        #profit_estimation = (profit_estimation * i_episode + (env.tv - 1000000.))/(i_episode+1.)
+
+        print('total_value: %d, ten year profit: %d' % (env.tv, ten_year_profit))
+    print('train, win: %d, lose: %d, profit mean: %d' % (win, lose, np.mean(ten_year_profits) ))
 
 def test():
     win = 0
     lose = 0
     total_episode = 100
     profit_estimation = 0
+
+    #record actions count and ten year profits of each pair
+    ten_year_profits = []
+    actions_count = [0] * n_actions
+    #######################################################
+
     for i_episode in range(total_episode):
 
         env.reset(np.random.randint(0,10), np.random.randint(0,10))
         observation = np.array(env.state)
 
+        action_index = 0
         while True:
 
-            action = RL.choose_action(observation)
+            action = RL.choose_action(observation,action_index,i_episode)
+
+            #count action#################
+            actions_count[action] += 1
+            ##############################
+
+            action_index += 1
 
             observation_, reward, done= env.take_action(action)
             observation_ = np.array(observation_)
@@ -137,9 +158,19 @@ def test():
         else:
             lose += 1
 
-        profit_estimation = (profit_estimation * i_episode + (env.tv - 1000000.))/(i_episode+1.)
-        print('total_value: %d, profit_estimation: %d' % (env.tv, profit_estimation))
-    print('test, win: %d, lose: %d, profit_estimation: %d' % (win, lose, profit_estimation))
+        ten_year_profit = env.tv - 1000000.
+
+        ##############################
+        ten_year_profits.append(ten_year_profit)
+        ##############################
+
+        #profit_estimation = (profit_estimation * i_episode + (env.tv - 1000000.))/(i_episode+1.)
+        print('total_value: %d, ten year profit: %d' % (env.tv, ten_year_profit))
+    ##############################
+    np.savetxt("ten_year_profits_test.csv",np.array(ten_year_profits),delimiter=",")
+    np.savetxt("actions_count_test.csv",np.array(actions_count),delimiter=",")
+    ##############################
+    print('test, win: %d, lose: %d, profit mean: %d' % (win, lose, np.mean(ten_year_profits)))
 
 
 def random():
@@ -150,6 +181,11 @@ def random():
 
     profits = []
 
+    #record actions count and ten year profits of each pair
+    ten_year_profits = []
+    actions_count = [0] * n_actions
+    #######################################################
+
     for i_episode in range(total_episode):
 
         env.reset(np.random.randint(0,10), np.random.randint(0,10))
@@ -158,6 +194,10 @@ def random():
         while True:
 
             action = np.random.randint(0,n_actions)
+
+            #count action#################
+            actions_count[action] += 1
+            ##############################
 
             observation_, reward, done= env.take_action(action)
             observation_ = np.array(observation_)
@@ -174,9 +214,21 @@ def random():
         else:
             lose += 1
 
-        profit_estimation = (profit_estimation * i_episode + (env.tv - 1000000.))/(i_episode+1.)
-        print('total_value: %d, profit_estimation: %d' % (env.tv, profit_estimation))
-    print('test, win: %d, lose: %d, profit_estimation: %d' % (win, lose, profit_estimation))
+        ten_year_profit = env.tv - 1000000.
+
+        ##############################
+        ten_year_profits.append(ten_year_profit)
+        ##############################
+
+        #profit_estimation = (profit_estimation * i_episode + (env.tv - 1000000.))/(i_episode+1.)
+        print('total_value: %d, ten year profit: %d' % (env.tv, ten_year_profit))
+
+    ##############################
+    np.savetxt("ten_year_profits_rand.csv",np.array(ten_year_profits),delimiter=",")
+    np.savetxt("actions_count_rand.csv",np.array(actions_count),delimiter=",")
+    ##############################
+
+    print('test, win: %d, lose: %d, profit mean: %d' % (win, lose, np.mean(ten_year_profits)))
 
 if __name__ == '__main__':
     env = Env(actions = actions)
@@ -190,6 +242,6 @@ if __name__ == '__main__':
         reward_decay=0.99,
         # output_graph=True,
     )
-    #run_stock()
-    #test()
+    run_stock()
+    test()
     random()
